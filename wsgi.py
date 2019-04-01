@@ -139,12 +139,16 @@ def post_publish():
     # send a POST request to upload service with files and headers info
     try:
         prometheus_metrics.METRICS['posts'].inc()
-        _retryable(
+        url = f'http://{UPLOAD_SERVICE_ENDPOINT}'
+        # import pdb;pdb.set_trace()
+        resp = _retryable(
             'post',
-            f'http://{UPLOAD_SERVICE_ENDPOINT}',
+            url,
             files=files,
             headers=headers
         )
+        ROOT_LOGGER.info("upload (%s) returned %s", url, resp.status_code)
+        ROOT_LOGGER.info("upload resp: %s", resp.text)
         prometheus_metrics.METRICS['post_successes'].inc()
     except requests.HTTPError as e:
         ROOT_LOGGER.error("Unable to access upload-service: %s", e)
